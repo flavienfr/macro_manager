@@ -216,7 +216,9 @@ def saveMacros():
 
 def getMacrosFromFileOrCreateIt():
     if not exists("macros.json"):
-        open("macros.json", "w").close()
+        file = open("macros.json", "w")
+        json.dump([], file)
+        file.close()
         return []
     file = open("macros.json", "r")
     macros = json.load(file)
