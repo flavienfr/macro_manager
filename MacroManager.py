@@ -8,8 +8,20 @@ from os.path import exists
 macros = []
 hasEditMode = False
 WHITE = "#ffffff"
+
+ADD_MACRO = "Ajouter une macro"
 EDIT_UNABLE = "Mode édition"
 EDIT_DISABLE = "Quitter l'édition"
+MACRO_NAME_LABEL = "Nom de la macro"
+MACRO_PATH_LABEL = "Chemin de la macro"
+BROWSE = "Parcourir"
+EDIT = "Modifier"
+CREATE = "Créer"
+REMOVE = "Retirer"
+REMOVE_ICON_PATH = "delete.png"
+EDIT_ICON_PATH = "edit.png"
+
+WINDOW_CONF_FILE = "window.conf"
 
 
 class MacroWindowBase:
@@ -47,7 +59,7 @@ class MacroWindowBase:
         macroWindow.columnconfigure(0, weight=3)
         macroWindow.columnconfigure(1, weight=1)
 
-        macroNameLabel = Label(macroWindow, text="Nom de la macro")
+        macroNameLabel = Label(macroWindow, text=MACRO_NAME_LABEL)
         macroNameLabel.grid(column=0, row=0, sticky=W, padx=10, pady=2)
 
         macroNameInputbox = Entry(macroWindow, width=30)
@@ -55,7 +67,7 @@ class MacroWindowBase:
         macroNameInputbox.insert('end', macroNameEntryText)
         macroNameInputbox.grid(column=0, row=2, sticky=W, padx=13)
 
-        macroPathLabel = Label(macroWindow, text="Chemin de la macro")
+        macroPathLabel = Label(macroWindow, text=MACRO_PATH_LABEL)
         macroPathLabel.grid(column=0, row=3, sticky=W, padx=10, pady=2)
 
         macroPathInput = Entry(macroWindow, width=70)
@@ -63,7 +75,7 @@ class MacroWindowBase:
         macroPathInput.insert('end', macroPathEntryText)
         macroPathInput.grid(column=0, row=4, sticky=W, padx=13)
 
-        browseBtn = Button(macroWindow, text="Parcourir", width=10,
+        browseBtn = Button(macroWindow, text=BROWSE, width=10,
                            command=lambda: self.setMacroPathEntry(macroPathInput))
         browseBtn.grid(column=1, row=4, sticky=W, padx=(0, 10))
 
@@ -78,7 +90,7 @@ class EditMacroWindow(MacroWindowBase):
 
     @property
     def confirmBtnTxt(self):
-        return "Modifier"
+        return EDIT
 
     def getNameLabel(self):
         return macros[self.row]['name']
@@ -102,7 +114,7 @@ class CreateMacroWindow(MacroWindowBase):
 
     @property
     def confirmBtnTxt(self):
-        return "Créer"
+        return CREATE
 
     def getNameLabel(self):
         return ""
@@ -111,7 +123,6 @@ class CreateMacroWindow(MacroWindowBase):
         return ""
 
     def callback(self, window, newName, newPath):
-        print("Adding macro ", newName, "at path ", newPath)
         macros.append({"name": newName, "path": newPath})
         saveMacros()
         window.destroy()
@@ -131,8 +142,8 @@ class DynamicGrid(Frame):
         vsb.pack(side="right", fill="y")
         self.text.pack(fill="both", expand=True)
         self.boxes = []
-        self.editIcon = getImageIfExists("edit.png")
-        self.deleteIcon = getImageIfExists("delete.png")
+        self.editIcon = getImageIfExists(EDIT_ICON_PATH)
+        self.deleteIcon = getImageIfExists(REMOVE_ICON_PATH)
 
     def displayMacros(self):
         for i in range(len(macros)):
@@ -146,28 +157,28 @@ class DynamicGrid(Frame):
 
         if (hasEditMode):
             btnRun = Button(macroLigneBtns, text=macro["name"], command=lambda: executeMacro(
-                macro["path"]), width=25, height=1)
+                macro["path"]), width=25, height=2)
             btnRun.grid(column=0, row=0, padx=(5, 5))
             if (self.editIcon):
-                btnEdit = Button(macroLigneBtns, text="Editer",
+                btnEdit = Button(macroLigneBtns, text=EDIT,
                                  image=self.editIcon, command=lambda: EditMacroWindow(row))
                 btnEdit.grid(column=0, row=1, sticky=W,
                              pady=(5, 10), padx=(65, 0))
             else:
-                btnEdit = Button(macroLigneBtns, text="Editer",
-                                 command=lambda: EditMacroWindow(row), width=5)
+                btnEdit = Button(macroLigneBtns, text=EDIT,
+                                 command=lambda: EditMacroWindow(row), width=7)
                 btnEdit.grid(column=0, row=1, sticky=W,
-                             pady=(5, 10), padx=(45, 0))
+                             pady=(5, 10), padx=(35, 0))
             if (self.deleteIcon):
                 btnDelete = Button(
                     macroLigneBtns, image=self.deleteIcon, command=lambda: self.deleteMacro(row))
                 btnDelete.grid(column=0, row=1, sticky=E,
                                pady=(5, 10), padx=(0, 65))
             else:
-                btnDelete = Button(macroLigneBtns, text="Retirer",
-                                   command=lambda: self.deleteMacro(row), width=5)
+                btnDelete = Button(macroLigneBtns, text=REMOVE,
+                                   command=lambda: self.deleteMacro(row), width=7)
                 btnDelete.grid(column=0, row=1, sticky=E,
-                               pady=(5, 10), padx=(0, 45))
+                               pady=(5, 10), padx=(0, 35))
         else:
             btnRun = Button(macroLigneBtns, text=macro["name"], command=lambda: executeMacro(
                 macro["path"]), width=25, height=2)
@@ -181,7 +192,6 @@ class DynamicGrid(Frame):
         self.text.configure(state="disabled")
 
     def deleteMacro(self, row):
-        print("Delete macro", macros[row]["name"])
         macros.pop(row)
         saveMacros()
         self.reloadMacrosFrame()
@@ -204,7 +214,6 @@ def getImageIfExists(imagePath):
 
 
 def executeMacro(path):
-    print("execute Macro", path)
     subprocess.call(["py", path])
 
 
@@ -226,30 +235,57 @@ def getMacrosFromFileOrCreateIt():
     return macros
 
 
-def EditMode(btn):
+def EditMode(editBtn, createBtn):
     global hasEditMode
     hasEditMode = not hasEditMode
 
-    if btn.config('text')[-1] == EDIT_UNABLE:
-        btn.config(text=EDIT_DISABLE)
+    if (hasEditMode):
+        editBtn.pack_forget()
+        editBtn.pack(side=TOP, pady=(5, 5))
+        createBtn.pack(side=TOP, pady=(0, 10))
     else:
-        btn.config(text=EDIT_UNABLE)
+        editBtn.pack_forget()
+        createBtn.pack_forget()
+        editBtn.pack(side=TOP, pady=(5, 41))
+
+    if editBtn.config('text')[-1] == EDIT_UNABLE:
+        editBtn.config(text=EDIT_DISABLE)
+    else:
+        editBtn.config(text=EDIT_UNABLE)
     macrosBtns.reloadMacrosFrame()
 
 
 def displayEditAndCreateMacroBtn(frame):
-    createBtn = Button(frame, text="Ajouter une macro",
-                       width=15, height=2, command=lambda: CreateMacroWindow())
-    editBtn = Button(frame, text=EDIT_UNABLE, width=15,
-                     command=lambda: EditMode(editBtn))
-    createBtn.pack(side=TOP, pady=(5, 5))
-    editBtn.pack(side=TOP, pady=(0, 10))
+    gui = Frame(frame, background=WHITE)
+    gui.pack()
+    editBtn = Button(gui, text=EDIT_UNABLE, width=15, height=2,
+                     command=lambda: EditMode(editBtn, createBtn))
+    createBtn = Button(gui, text=ADD_MACRO,
+                       width=15, command=lambda: CreateMacroWindow())
+    editBtn.pack(side=TOP, pady=(5, 41))
 
+
+def saveWindowConf(event):
+    with open(WINDOW_CONF_FILE, "w") as conf:
+        conf.write(window.geometry())
+
+
+def readWindowConf():
+    if exists(WINDOW_CONF_FILE):
+        file = open(WINDOW_CONF_FILE, "r")
+        conf = file.read()
+        file.close()
+        return conf.split("+")[0]
+    return "750x500"
 
 # Main
+
+
 window = Tk()
+windowConf = readWindowConf()
+window.geometry(windowConf)
 window.title("Macro Manager")
-window.geometry("750x500")
+window.bind("<Configure>", saveWindowConf)
 window.configure(bg=WHITE)
 
 displayEditAndCreateMacroBtn(window)
