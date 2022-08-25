@@ -1,4 +1,4 @@
-# macro_manager
+# Macros manager
 
 Macro manager is a graphic project in python 3 (without extern library)
 to handle your python scripts from a window.
