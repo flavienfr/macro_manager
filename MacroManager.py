@@ -9,6 +9,7 @@ macros = []
 hasEditMode = False
 WHITE = "#ffffff"
 
+WINDOW_TITLE = "Macro Manager"
 ADD_MACRO = "Ajouter une macro"
 EDIT_UNABLE = "Mode édition"
 EDIT_DISABLE = "Quitter l'édition"
@@ -21,6 +22,7 @@ REMOVE = "Retirer"
 REMOVE_ICON_PATH = "delete.png"
 EDIT_ICON_PATH = "edit.png"
 
+MACROS_JSON_PATH = "macros.json"
 WINDOW_CONF_FILE = "window.conf"
 
 
@@ -136,7 +138,7 @@ class DynamicGrid(Frame):
     def __init__(self, parent, *args, **kwargs):
         Frame.__init__(self, parent, *args, **kwargs)
         self.text = Text(self, wrap="char", borderwidth=0, highlightthickness=0,
-                         state="disabled")
+                         state="disabled", cursor="arrow")
         vsb = Scrollbar(orient="vertical", command=self.text.yview)
         self.text.configure(yscrollcommand=vsb.set)
         vsb.pack(side="right", fill="y")
@@ -218,18 +220,18 @@ def executeMacro(path):
 
 
 def saveMacros():
-    file = open("macros.json", "w")
+    file = open(MACROS_JSON_PATH, "w")
     json.dump(macros, file)
     file.close()
 
 
 def getMacrosFromFileOrCreateIt():
-    if not exists("macros.json"):
-        file = open("macros.json", "w")
+    if not exists(MACROS_JSON_PATH):
+        file = open(MACROS_JSON_PATH, "w")
         json.dump([], file)
         file.close()
         return []
-    file = open("macros.json", "r")
+    file = open(MACROS_JSON_PATH, "r")
     macros = json.load(file)
     file.close()
     return macros
@@ -284,7 +286,7 @@ def readWindowConf():
 window = Tk()
 windowConf = readWindowConf()
 window.geometry(windowConf)
-window.title("Macro Manager")
+window.title(WINDOW_TITLE)
 window.bind("<Configure>", saveWindowConf)
 window.configure(bg=WHITE)
 
