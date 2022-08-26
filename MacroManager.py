@@ -236,7 +236,7 @@ def getImageIfExists(imagePath):
 
 
 def executeMacro(path):
-    subprocess.call(["py", path])
+    subprocess.Popen(["py", path])
 
 
 def saveMacros():
