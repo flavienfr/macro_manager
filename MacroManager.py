@@ -28,6 +28,9 @@ WINDOW_CONF_FILE = "window.conf"
 
 class MacroWindowBase:
 
+    macroWindowWidth = 500
+    macroWindowHeight = 150
+
     @property
     @abstractmethod
     def confirmBtnTxt(self):
@@ -54,9 +57,16 @@ class MacroWindowBase:
     def __init__(self):
         macroWindow = Toplevel(window)
         macroWindow.grab_set()
-        macroWindow.geometry("500x150")
-        macroWindow.maxsize(width=500, height=150)
-        macroWindow.minsize(width=200, height=150)
+
+        windowX, windowY = getParentWindowCenter(
+            self.macroWindowWidth, self.macroWindowHeight)
+        macroWindow.geometry(
+            "{}x{}+{}+{}".format(self.macroWindowWidth, self.macroWindowHeight, windowX, windowY))
+
+        macroWindow.maxsize(width=self.macroWindowWidth,
+                            height=self.macroWindowHeight)
+        macroWindow.minsize(width=self.macroWindowWidth,
+                            height=self.macroWindowHeight)
 
         macroWindow.columnconfigure(0, weight=3)
         macroWindow.columnconfigure(1, weight=1)
@@ -206,6 +216,16 @@ class DynamicGrid(Frame):
         self.text.configure(state="normal")
         self.text.delete(1.0, "end")
         self.text.configure(state="disabled")
+
+
+def getParentWindowCenter(windowWidth, windowHeight):
+    screen_width = window.winfo_width()
+    screen_height = window.winfo_height()
+    x = window.winfo_x()
+    y = window.winfo_y()
+    windowX = (screen_width // 2) + (x - windowWidth // 2)
+    windowY = (screen_height // 2) + (y - windowHeight // 2)
+    return windowX, windowY
 
 
 def getImageIfExists(imagePath):
