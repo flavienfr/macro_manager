@@ -1,2 +1,5 @@
 macros.json
 window.conf
+
+# IDE files
+/.idea/

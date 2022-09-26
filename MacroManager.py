@@ -25,6 +25,9 @@ EDIT_ICON_PATH = "edit.png"
 MACROS_JSON_PATH = "macros.json"
 WINDOW_CONF_FILE = "window.conf"
 
+with open("MacroManager.bat", "r") as file:
+    PYTHON_PATH: str = file.readline().split(" ")[0]
+
 
 class MacroWindowBase:
 
@@ -236,7 +239,7 @@ def getImageIfExists(imagePath):
 
 
 def executeMacro(path):
-    subprocess.Popen(["py", path])
+    subprocess.Popen([PYTHON_PATH, path])
 
 
 def saveMacros():
